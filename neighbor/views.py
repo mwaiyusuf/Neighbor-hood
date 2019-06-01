@@ -24,7 +24,7 @@ def home(request):
             businesses = Business.objects.filter(
                 hood=request.user.join.hood_id.id)
 
-            return render(request, 'hoods/hood.html', {"hood": hood, "businesses": businesses, "posts": posts})
+            return render(request, 'neighhoods/neighbor.html', {"hood": hood, "businesses": businesses, "posts": posts})
         else:
             neighbourhoods = Hood.objects.all()
             return render(request, 'index.html', {"neighbourhoods": neighbourhoods})
@@ -46,7 +46,7 @@ def new_business(request):
 
     else:
         form = BusinessForm()
-    return render(request, 'business.html', {"form": form})
+    return render(request, 'biz.html', {"form": form})
 
 
 @login_required(login_url='/accounts/login/')
@@ -79,7 +79,7 @@ def hoods(request):
 
     hood = Hood.objects.filter(user=request.user)
 
-    return render(request, 'hoods/hood.html', {"hood": hood})
+    return render(request, 'neighhoods/neighbor.html', {"hood": hood})
 
 @login_required(login_url='/accounts/login/')
 def join(request, hoodId):
