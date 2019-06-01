@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^profile/$', views.profile, name='profile'),
     url(r'^editprofile/$', views.edit_profile, name='edit_profile'),
+     url(r'^ajax/newsletter/$', views.newsletter, name='newsletter'),
     url(r'^new/business', views.new_business, name='add_business'),
     url(r'^join/(\d+)', views.join, name='join'),
     url(r'^myhood/$', views.hoods, name='hood'),
@@ -18,6 +19,9 @@ urlpatterns = [
     url(r'^deletehood/(\d+)', views.delete_hood, name='delete_hood'),
     url(r'^updatehood/(\d+)', views.update_hood, name='update_hood'),
     url(r'^occupants/(?P<hood_id>\d+)', views.occupants, name='occupants'),
+    url(r'^api/merch/$', views.MerchList.as_view()),
+    url(r'api/merch/merch-id/(?P<pk>[0-9]+)/$',
+        views.MerchDescription.as_view()),
 
 ]
 

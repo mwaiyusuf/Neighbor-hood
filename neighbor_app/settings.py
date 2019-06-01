@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rest_framework',
+    'rest_framework.authtoken'
     'neighbor',
     'tinymce',
     'bootstrap4',
@@ -86,6 +87,12 @@ DATABASES = {
         'USER': 'neighbor',
     'PASSWORD':'0732442483a',
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    )
 }
 
 
