@@ -7,7 +7,7 @@ class ProfileTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(id =1, username='zyzu')
-        self.profile = Profile.objects.create(user = self.user,bio = 'blow away',email='abc@test.com')
+        self.profile = Profile.objects.create(user = self.user,bio = 'blow away',email='bwa@test.com')
 
     def test_instance(self):
         self.assertTrue(isinstance(self.profile,Profile))
@@ -36,11 +36,7 @@ class HoodTest(TestCase):
         hoods = Hood.get_hoods()
         self.assertTrue(len(hoods) > 0)
 
-    # def test_search_hood(self):
-    #     self.south.save()
-    #     hoods = Hood.search_hood('1')
-    #     self.assertTrue(len(hoods) > 0)
-
+    
 class BusinessTest(TestCase):
     def setUp(self):
         self.mpesa= Business.objects.create(b_name='star',b_description='dope',b_email='xyz.test.com')
