@@ -15,7 +15,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
-from .tokens import account_activation_token
+# from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from .email import send_welcome_email
@@ -32,13 +32,14 @@ def home(request):
             businesses = Business.objects.filter(
                 hood=request.user.join.hood_id.id)
 
-            return render(request, 'neighhoods/neighbor.html', {"hood": hood, "businesses": businesses, "posts": posts})
+            return render(request, 'neighoods/neighbor.html', {"hood": hood, "businesses": businesses, "posts": posts})
         else:
             neighbourhoods = Hood.objects.all()
             return render(request, 'index.html', {"neighbourhoods": neighbourhoods})
     else:
         neighbourhoods = Hood.objects.all()
         return render(request, 'index.html', {"neighbourhoods": neighbourhoods})
+
 
 def new_business(request):
     current_user = request.user
@@ -87,7 +88,7 @@ def hoods(request):
 
     hood = Hood.objects.filter(user=request.user)
 
-    return render(request, 'neighhoods/neighbor.html', {"hood": hood})
+    return render(request, 'neighoods/neighbor.html', {"hood": hood})
 
 @login_required(login_url='/accounts/login/')
 def join(request, hoodId):
@@ -102,7 +103,119 @@ def join(request, hoodId):
     messages.success(
         request, 'Success! You have succesfully joined this Neighbourhood ')
     return redirect('home')
+@login_required(login_url='/accounts/login/')
+def exitHood(request, hoodId):
 
+    if Join.objects.filter(user_id=request.user).exists():
+        Join.objects.get(user_id=request.user).delete()
+        messages.error(
+            request, 'You have succesfully exited this Neighbourhood.')
+        return redirect('home')
+
+
+def search(request):
+
+    if request.GET['search']:
+        hood_search = request.GET.get("search")
+        hoods = Hood.search_hood(hood_search)
+        message = f"{hood_search}"
+
+        return render(request, 'hoods/search.html', {"message": message, "hoods": hoods})
+
+    else:
+        message = "You Haven't searched for any hood"
+        return render(request, 'neighoods/search.html', {"message": message})
+
+
+@login_required(login_url='/accounts/login/')
+def create_post(request):
+
+    if Join.objects.filter(user_id=request.user).exists():
+        if request.method == 'POST':
+            form = PostForm(request.POST)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.posted_by = request.user
+                post.hood = request.user.join.hood_id
+                post.save()
+                messages.success(
+                    request, 'You have succesfully created a Post')
+                return redirect('home')
+        else:
+            form = PostForm()
+        return render(request, 'posts/createpost.html', {"form": form})
+
+
+@login_required(login_url='/accounts/login/')
+def add_comment(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    current_user = request.user
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.poster = current_user
+            comment.save()
+            return redirect('home')
+    else:
+        form = CommentForm()
+        return render(request, 'comment.html', {"user": current_user, "comment_form": form})
+
+
+def delete_post(request, postId):
+    Posts.objects.filter(pk=postId).delete()
+    messages.error(request, 'Succesfully Deleted a Post')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required(login_url='/accounts/login/')
+def create_hood(request):
+    current_user = request.user
+    if request.method == 'POST':
+        form = CreateHoodForm(request.POST, request.FILES)
+        if form.is_valid():
+            hood = form.save(commit=False)
+            hood.user = current_user
+            hood.save()
+            messages.success(
+                request, 'You Have succesfully created a hood.Now proceed and join a hood')
+        return redirect('home')
+    else:
+        form = CreateHoodForm()
+    return render(request, 'neighoods/create_neigh.html', {"form": form})
+
+
+@login_required(login_url='/accounts/login/')
+def update_hood(request, id):
+    current_user = request.user
+    hood = get_object_or_404(Hood, pk=id)
+    if request.method == 'POST':
+        form = CreateHoodForm(request.POST, request.FILES, instance=hood)
+        if form.is_valid():
+            hood = form.save(commit=False)
+            hood.user = current_user
+            hood.save()
+            messages.success(
+                request, 'You Have succesfully Edited Hood Details.')
+        return redirect('home')
+    else:
+        form = CreateHoodForm(instance=hood)
+    return render(request, 'neighoods/create_neigh.html', {"form": form})
+
+
+@login_required(login_url='/accounts/login/')
+def delete_hood(request, id):
+
+    Hood.objects.filter(user=request.user, pk=id).delete()
+    messages.error(request, 'Succesfully deleted your hood')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+def occupants(request, id):
+    occupants = Join.objects.filter(id=hood_id).count()
+
+    return redirect('home')
 
 class MerchList(APIView):
     def get(self, request, format=None):
@@ -110,13 +223,13 @@ class MerchList(APIView):
         serializers = MerchSerializer(all_merch, many=True)
         return Response(serializers.data)
 
-     def post(self, request, format=None):
+    def post(self, request, format=None):
         serializers = MerchSerializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
             return Response(serializers.data, status=status.HTTP_201_CREATED)
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
-      permission_classes = (IsAdminOrReadOnly,)
+        permission_classes = (IsAdminOrReadOnly,)
 
 class MerchDescription(APIView):
       permission_classes = (IsAdminOrReadOnly,)
@@ -131,7 +244,7 @@ class MerchDescription(APIView):
           serializers = MerchSerializer(merch)
           return Response(serializers.data)
 
-       def put(self, request, pk, format=None):
+      def put(self, request, pk, format=None):
         merch = self.get_merch(pk)
         serializers = MerchSerializer(merch, request.data)
         if serializers.is_valid():
@@ -141,6 +254,6 @@ class MerchDescription(APIView):
             return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
         def delete(self, request, pk, format=None):
-        merch = self.get_merch(pk)
-        merch.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            merch = self.get_merch(pk)
+            merch.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)

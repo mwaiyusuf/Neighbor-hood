@@ -1,3 +1,3 @@
 Hello {{name}}
 
-Welcome to the Moringa tribune newsletter You will find the most exciting news about Moringa School
+ Welcome to Neighbor hood. You will find your neighbors around your place
